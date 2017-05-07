@@ -18,7 +18,7 @@ import os
 import webapp2
 from jinja2 import Environment, FileSystemLoader
 import re
-
+template_dir = os.path.dirname(__file__)
 jinjaEnv = Environment(loader=FileSystemLoader(template_dir))
 
 USER_RE = re.compile(r"^[a-zA-Z0-9]{3,15}$")
