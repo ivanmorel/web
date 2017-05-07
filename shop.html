@@ -1,0 +1,13 @@
+<form method="post">
+    <h2>Add a food</h2>
+    <input name="food">
+    <button>Add</button>
+</form>
+{% if shop.__len__() > 0 %}
+<h2>Shopping List</h2>
+<ul>
+    {% for item in shop %}
+    <li>{{item}}</li>
+    {% endfor %}
+</ul>
+{% endif %}

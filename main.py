@@ -19,7 +19,7 @@ import webapp2
 from jinja2 import Environment, FileSystemLoader
 import re
 template_dir = os.path.dirname(__file__)
-jinjaEnv = Environment(loader=FileSystemLoader(template_dir))
+jinjaEnv = Environment(loader=FileSystemLoader(template_dir),autoescape=True)
 
 USER_RE = re.compile(r"^[a-zA-Z0-9]{3,15}$")
 PASS_RE = re.compile(r"^.{3,15}$")
@@ -81,6 +81,17 @@ class SignUp(Handler):
             self.response.write("Thank you")
 
 
+class Shop(Handler):
+    shop = []
+
+    def get(self):
+        self.render('shop.html', shop=Shop.shop)
+
+    def post(self):
+        Shop.shop.append(self.request.get('food'))
+        self.render('shop.html', shop=Shop.shop)
+
+
 def valid_user(username):
     return username and USER_RE.match(username)
 
@@ -94,6 +105,7 @@ def valid_email(email):
 
 
 app = webapp2.WSGIApplication([
-    ('/', SignUp),
+    ('/', Shop),
     ('/rot13', Rot13),
+    ('/signup', SignUp),
 ], debug=True)
