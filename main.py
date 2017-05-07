@@ -78,7 +78,7 @@ class SignUp(Handler):
         if error:
             self.render('signup.html', **params)
         else:
-            self.response.write("Thank you")
+            self.response.write("<h1>Thank you</h1>")
 
 
 class Shop(Handler):
@@ -91,6 +91,18 @@ class Shop(Handler):
         Shop.shop.append(self.request.get('food'))
         self.render('shop.html', shop=Shop.shop)
 
+
+class FizzBuzz(Handler):
+    def get(self):
+        num = []
+        for i in range(1, 100):
+            if i % 3 == 0:
+                num.append('Fizz')
+            elif i % 5 == 0:
+                num.append('Buzz')
+            else:
+                num.append(i)
+        self.render('FizzBuzz.html', num=num)
 
 def valid_user(username):
     return username and USER_RE.match(username)
@@ -105,7 +117,8 @@ def valid_email(email):
 
 
 app = webapp2.WSGIApplication([
-    ('/', Shop),
+    ('/fizzbuzz', FizzBuzz),
+    ('/shop', Shop),
     ('/rot13', Rot13),
     ('/signup', SignUp),
 ], debug=True)

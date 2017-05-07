@@ -1,27 +1,31 @@
-<form method="post">
-   <table>
-       <tr>
-           <td> Username</td>
-           <td> <input name="username"></td>
-            <td> {{error_user}}</td>
-       </tr>
-       <tr>
-           <td> Password</td>
-           <td> <input name="password" type="password"></td>
-           <td>{{error_pass}}</td>
-       </tr>
-       <tr>
-           <td> Verify Password</td>
-           <td> <input name="verify" type="password"></td>
-           <td>{{error_ver}}</td>
-       </tr>
-       <tr>
-           <td> Email(Optional)</td>
-           <td> <input name="email"></td>
-           <td>{{error_email}}</td>
-       </tr>
-       <tr>
-           <td> <input type="submit"></td>
-       </tr>
-   </table>
-</form>
+{% extends 'base.html' %}
+
+{% block content %}
+    <form method="post">
+       <table>
+           <tr>
+               <td> Username</td>
+               <td> <input name="username"></td>
+                <td> {{error_user}}</td>
+           </tr>
+           <tr>
+               <td> Password</td>
+               <td> <input name="password" type="password"></td>
+               <td>{{error_pass}}</td>
+           </tr>
+           <tr>
+               <td> Verify Password</td>
+               <td> <input name="verify" type="password"></td>
+               <td>{{error_ver}}</td>
+           </tr>
+           <tr>
+               <td> Email(Optional)</td>
+               <td> <input name="email"></td>
+               <td>{{error_email}}</td>
+           </tr>
+           <tr>
+               <td> <input type="submit"></td>
+           </tr>
+       </table>
+    </form>
+{% endblock %}
