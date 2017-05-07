@@ -104,6 +104,7 @@ class FizzBuzz(Handler):
                 num.append(i)
         self.render('FizzBuzz.html', num=num)
 
+
 def valid_user(username):
     return username and USER_RE.match(username)
 
