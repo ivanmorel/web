@@ -1,25 +1,10 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import os
 import webapp2
 from jinja2 import Environment, FileSystemLoader
 import re
-template_dir = os.path.dirname(__file__)
-jinjaEnv = Environment(loader=FileSystemLoader(template_dir),autoescape=True)
+
+template_dir = os.path.join(os.path.dirname(__file__), 'template')
+jinjaEnv = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
 
 USER_RE = re.compile(r"^[a-zA-Z0-9]{3,15}$")
 PASS_RE = re.compile(r"^.{3,15}$")
@@ -30,8 +15,7 @@ class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.write(*a, **kw)
 
-    @staticmethod
-    def render_str(template, **params):
+    def render_str(self, template, **params):
         return jinjaEnv.get_template(template).render(params)
 
     def render(self, template, **kw):
@@ -105,6 +89,11 @@ class FizzBuzz(Handler):
         self.render('FizzBuzz.html', num=num)
 
 
+class Memes(Handler):
+    def get(self):
+        self.render('memes.html')
+
+
 def valid_user(username):
     return username and USER_RE.match(username)
 
@@ -118,6 +107,7 @@ def valid_email(email):
 
 
 app = webapp2.WSGIApplication([
+    ('/memes', Memes),
     ('/fizzbuzz', FizzBuzz),
     ('/shop', Shop),
     ('/rot13', Rot13),
