@@ -16,6 +16,9 @@ PASS_RE = re.compile(r"^.{3,15}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
 SECRET = "wtfmanin"
 
+# Handlers
+
+
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.write(*a, **kw)
@@ -99,17 +102,6 @@ class Memes(Handler):
         self.render('memes.html')
 
 
-class Art(model.Model):
-    art = model.TextProperty()
-    date = model.DateTimeProperty(auto_now_add=True)
-
-
-class Blog(model.Model):
-    title = model.StringProperty()
-    body = model.TextProperty()
-    date = model.DateTimeProperty(auto_now_add=True)
-
-
 class Ascii(Handler):
     def get(self):
         self.render('ASCIIart.html', arts=Art.query().order(-Art.date))
@@ -139,7 +131,7 @@ class BlogView(Handler):
 class Cookie(Handler):
     def get(self):
         if not self.request.cookies.get('pass'):
-            self.response.headers.add_header('Set-Cookie', 'pass=%s' % hmac.new(SECRET, 'sancocho94').hexdigest())
+            self.response.set_cookie('pass', hmac.new(SECRET, 'sancocho94').hexdigest())
         self.render('cookie.html')
 
     def post(self):
@@ -147,6 +139,78 @@ class Cookie(Handler):
         pwd_hash = hmac.new(SECRET, self.request.get('pass')).hexdigest()
         msg = "Correct Password" if pwd_hash == hash_cookie else 'Incorrect Password'
         self.render('cookie.html', msg=msg)
+
+
+class SigningUp(Handler):
+    def get(self):
+        self.render('signingup.html')
+        delete(User)
+
+    def post(self):
+        error = {}
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
+        if User.query(User.username == username).count() != 0:
+            error['error_user'] = 'User exists'
+            self.render('signingup.html', **error)
+        elif not password:
+            error['error_pass'] = 'Must type password'
+            self.render('signingup.html', **error)
+        elif not password == verify:
+            error['error_ver'] = 'Passwords do not match'
+            self.render('signingup.html', **error)
+        elif not valid_email(email):
+            error['error_email'] = 'Wrong email format'
+            self.render('signingup.html', **error)
+        else:
+            password = hashlib.sha256(password).hexdigest()
+            User(username=username, password=password, email=email, parent=ndb.Key(Blog, 'Blogs')).put()
+            self.render('signingup.html', msg="User created successfully")
+
+
+class Login(Handler):
+    def get(self):
+        self.render('login.html')
+
+    def post(self):
+        username = self.request.get('username')
+        pass_hash = hashlib.sha256(self.request.get('password')).hexdigest()
+
+        if User.query(User.username == username).count() == 0:
+            msg = "User does not exist"
+            self.render('login.html', msg=msg)
+        elif not pass_hash == User.query(User.username == username).fetch()[0].password:
+            msg = "Invalid password"
+            self.render('login.html', msg=msg)
+        else:
+            self.response.set_cookie('user', username)
+            self.response.set_cookie('pass', pass_hash)
+            self.write("<h1>Welcome %s!</h1>" % username.capitalize())
+
+
+# Models
+
+
+class Art(model.Model):
+    art = model.TextProperty()
+    date = model.DateTimeProperty(auto_now_add=True)
+
+
+class Blog(model.Model):
+    title = model.StringProperty()
+    body = model.TextProperty()
+    date = model.DateTimeProperty(auto_now_add=True)
+
+
+class User(model.Model):
+    username = model.StringProperty()
+    password = model.StringProperty()
+    email = model.StringProperty()
+    date = model.DateTimeProperty(auto_now_add=True)
+
+# Validation
 
 
 def valid_user(username):
@@ -167,7 +231,9 @@ def delete(cls):
 
 
 app = webapp2.WSGIApplication([
-    ('/', Cookie),
+    ('/', Login),
+    ('/signup', SigningUp),
+    ('/login', Login),
     ('/cookie', Cookie),
     ('/blog', BlogView),
     ('/blogform', BlogForm),
@@ -176,5 +242,5 @@ app = webapp2.WSGIApplication([
     ('/fizzbuzz', FizzBuzz),
     ('/shop', Shop),
     ('/rot13', Rot13),
-    ('/signup', SignUp),
+    ('/signup2', SignUp),
 ], debug=True)
