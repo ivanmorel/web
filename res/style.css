@@ -1,2 +1,4 @@
 a { font-size: 20px; padding: 20px;}
-div {padding: 20px;}
+#block {padding: 20px;}
+textarea {width: 300px; height: 300px;}
+.align {text-align: center;}

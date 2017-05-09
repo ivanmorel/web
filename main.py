@@ -2,6 +2,11 @@ import os
 import webapp2
 from jinja2 import Environment, FileSystemLoader
 import re
+import hashlib
+import hmac
+
+from google.appengine.ext.ndb import model
+from google.appengine.ext import ndb
 
 template_dir = os.path.join(os.path.dirname(__file__), 'template')
 jinjaEnv = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
@@ -9,7 +14,7 @@ jinjaEnv = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
 USER_RE = re.compile(r"^[a-zA-Z0-9]{3,15}$")
 PASS_RE = re.compile(r"^.{3,15}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
-
+SECRET = "wtfmanin"
 
 class Handler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -94,6 +99,56 @@ class Memes(Handler):
         self.render('memes.html')
 
 
+class Art(model.Model):
+    art = model.TextProperty()
+    date = model.DateTimeProperty(auto_now_add=True)
+
+
+class Blog(model.Model):
+    title = model.StringProperty()
+    body = model.TextProperty()
+    date = model.DateTimeProperty(auto_now_add=True)
+
+
+class Ascii(Handler):
+    def get(self):
+        self.render('ASCIIart.html', arts=Art.query().order(-Art.date))
+
+    def post(self):
+        art = self.request.get('art')
+        Art(art=art, parent=ndb.Key(Art, 'Arts')).put()
+        self.render('ASCIIart.html', arts=Art.query(ancestor=ndb.Key(Art, 'Arts')).order(-Art.date), art=art)
+
+
+class BlogForm(Handler):
+    def get(self):
+        self.render('blogform.html')
+
+    def post(self):
+        title = self.request.get('title')
+        body = self.request.get('body')
+        Blog(title=title, body=body, parent=ndb.Key(Blog, 'Blogs')).put()
+        self.redirect("/blog")
+
+
+class BlogView(Handler):
+    def get(self):
+        self.render('blog.html',  blog=Blog.query(ancestor=ndb.Key(Blog, 'Blogs')).order(-Blog.date))
+
+
+class Cookie(Handler):
+    def get(self):
+        if not self.request.cookies.get('pass'):
+            self.response.headers.add_header('Set-Cookie', 'pass=%s' % hmac.new(SECRET, 'sancocho94').hexdigest())
+        self.render('cookie.html')
+
+    def post(self):
+        hash_cookie = self.request.cookies.get('pass')
+        pwd_hash = hmac.new(SECRET, self.request.get('pass')).hexdigest()
+        msg = "Correct Password" if pwd_hash == hash_cookie else 'Incorrect Password'
+        self.render('cookie.html', msg=msg)
+
+
 def valid_user(username):
     return username and USER_RE.match(username)
 
@@ -106,7 +161,17 @@ def valid_email(email):
     return email and EMAIL_RE.match(email)
 
 
+def delete(cls):
+    for i in cls.query():
+        i.put().delete()
+
+
 app = webapp2.WSGIApplication([
+    ('/', Cookie),
+    ('/cookie', Cookie),
+    ('/blog', BlogView),
+    ('/blogform', BlogForm),
+    ('/ascii', Ascii),
     ('/memes', Memes),
     ('/fizzbuzz', FizzBuzz),
     ('/shop', Shop),

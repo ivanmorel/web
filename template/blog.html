@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="align">
+    <h1>Blog</h1>
+    <a href="http://127.0.0.1:8080/blogform">Add Blog</a>
+    {% for b in blog %}
+        <h3>{{b.title}}</h3>
+        <pre>{{b.body}}</pre>
+    {% endfor%}
+</div>
+{% endblock %}

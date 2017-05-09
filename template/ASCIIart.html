@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="post" class="align">
+    <h1>ASCII Art</h1>
+    <h3>Enter Art:</h3>
+    <textarea name="art">{{art}}</textarea>
+    <br>
+    <button>Add</button>
+</form>
+{% for a in arts %}
+    <pre class="art">{{a.art}}</pre>
+{% endfor %}
+{% endblock %}
