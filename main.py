@@ -14,7 +14,7 @@ jinjaEnv = Environment(loader=FileSystemLoader(template_dir), autoescape=True)
 USER_RE = re.compile(r"^[a-zA-Z0-9]{3,15}$")
 PASS_RE = re.compile(r"^.{3,15}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+\.[\S]+$")
-SECRET = "wtfmanin"
+SECRET = "secretpass"
 
 # Handlers
 
