@@ -13,6 +13,9 @@
         <a href="http://127.0.0.1:8080/logout">Logout</a>
         <a href="http://127.0.0.1:8080/users">Users</a>
         <div id="block">
+            {% if not logout %}
+                {% include 'loggedin.html' %}
+            {% endif %}
             {% block content %}
             {% endblock %}
         </div>

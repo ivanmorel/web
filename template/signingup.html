@@ -28,12 +28,5 @@
         <h3 style="color: red">{{msg}}</h3>
         <td> <input type="submit"></td>
     </form>
-    {% for u in users%}
-        <p>{{u.username}}</p>
-    {% endfor %}
-
-    {% if user %}
-        {% include 'loggedIn.html' %}
-    {% endif %}
 <style> td {text-align: right}</style>
 {% endblock %}

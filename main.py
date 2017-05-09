@@ -27,7 +27,8 @@ class Handler(webapp2.RequestHandler):
         return jinjaEnv.get_template(template).render(params)
 
     def render(self, template, **kw):
-        self.write(self.render_str(template, **kw))
+        user = self.request.cookies.get('user')
+        self.write(self.render_str(template, user=user, **kw))
 
 
 class Rot13(Handler):
@@ -131,7 +132,7 @@ class BlogView(Handler):
 class Cookie(Handler):
     def get(self):
         if not self.request.cookies.get('pass'):
-            self.response.set_cookie('pass', hmac.new(SECRET, 'sancocho94').hexdigest())
+            self.response.set_cookie('pass', hmac.new(SECRET, 'secret123').hexdigest())
         self.render('cookie.html')
 
     def post(self):
@@ -143,8 +144,7 @@ class Cookie(Handler):
 
 class SigningUp(Handler):
     def get(self):
-        user = self.request.cookies.get('user')
-        self.render('signingup.html', user=user)
+        self.render('signingup.html')
 
     def post(self):
         error = {}
@@ -172,8 +172,7 @@ class SigningUp(Handler):
 
 class Login(Handler):
     def get(self):
-        user = self.request.cookies.get('user')
-        self.render('login.html', user=user)
+        self.render('login.html')
 
     def post(self):
         username = self.request.get('username')
@@ -188,14 +187,14 @@ class Login(Handler):
         else:
             self.response.set_cookie('user', username)
             self.response.set_cookie('pass', pass_hash)
-            self.render('welcome.html', user=username.capitalize())
+            self.render('welcome.html', userx=username.capitalize())
 
 
 class Logout(Handler):
     def get(self):
         self.response.delete_cookie('user')
         self.response.delete_cookie('pass')
-        self.render('logout.html')
+        self.render('logout.html', logout=True)
 
 
 class Users(Handler):
