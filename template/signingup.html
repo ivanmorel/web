@@ -31,5 +31,9 @@
     {% for u in users%}
         <p>{{u.username}}</p>
     {% endfor %}
+
+    {% if user %}
+        <h3 class="msg">Logged in: {{user}}</h3>
+    {% endif %}
 <style> td {text-align: right}</style>
 {% endblock %}

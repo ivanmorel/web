@@ -143,8 +143,8 @@ class Cookie(Handler):
 
 class SigningUp(Handler):
     def get(self):
-        self.render('signingup.html')
-        delete(User)
+        user = self.request.cookies.get('user')
+        self.render('signingup.html', user=user)
 
     def post(self):
         error = {}
@@ -166,13 +166,14 @@ class SigningUp(Handler):
             self.render('signingup.html', **error)
         else:
             password = hashlib.sha256(password).hexdigest()
-            User(username=username, password=password, email=email, parent=ndb.Key(Blog, 'Blogs')).put()
+            User(username=username, password=password, email=email, parent=ndb.Key(User, 'Users')).put()
             self.render('signingup.html', msg="User created successfully")
 
 
 class Login(Handler):
     def get(self):
-        self.render('login.html')
+        user = self.request.cookies.get('user')
+        self.render('login.html', user=user)
 
     def post(self):
         username = self.request.get('username')
@@ -187,7 +188,19 @@ class Login(Handler):
         else:
             self.response.set_cookie('user', username)
             self.response.set_cookie('pass', pass_hash)
-            self.write("<h1>Welcome %s!</h1>" % username.capitalize())
+            self.render('welcome.html', user=username.capitalize())
+
+
+class Logout(Handler):
+    def get(self):
+        self.response.delete_cookie('user')
+        self.response.delete_cookie('pass')
+        self.render('logout.html')
+
+
+class Users(Handler):
+    def get(self):
+        self.render('users.html', users=User.query(ancestor=ndb.Key(User, 'Users')).order(-User.date))
 
 
 # Models
@@ -229,10 +242,11 @@ def delete(cls):
     for i in cls.query():
         i.put().delete()
 
-
 app = webapp2.WSGIApplication([
     ('/', Login),
+    ('/users', Users),
     ('/signup', SigningUp),
+    ('/logout', Logout),
     ('/login', Login),
     ('/cookie', Cookie),
     ('/blog', BlogView),

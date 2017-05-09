@@ -10,4 +10,7 @@
     <p style="color: red">{{msg}}</p>
     <button style="margin-top: 10px">Log In</button>
 </form>
+{% if user %}
+    <h3 class="msg">Logged in: {{user}}</h3>
+{% endif %}
 {% endblock %}
