@@ -251,7 +251,6 @@ app = webapp2.WSGIApplication([
     ('/blog', BlogView),
     ('/blogform', BlogForm),
     ('/ascii', Ascii),
-    ('/memes', Memes),
     ('/fizzbuzz', FizzBuzz),
     ('/shop', Shop),
     ('/rot13', Rot13),
